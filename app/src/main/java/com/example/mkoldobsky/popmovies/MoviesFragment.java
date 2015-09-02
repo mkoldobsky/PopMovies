@@ -9,8 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.GridView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +28,8 @@ import java.util.ArrayList;
  */
 public class MoviesFragment extends Fragment {
 
-    ArrayAdapter<String> mMovieAdapter;
+    MovieAdapter mMovieAdapter;
+    ArrayList<Movie> mMovies;
 
     public MoviesFragment() {
     }
@@ -41,28 +41,25 @@ public class MoviesFragment extends Fragment {
 
 
 
-        mMovieAdapter = new ArrayAdapter<String>(this.getActivity(),
-                R.layout.list_item_movie,
-                R.id.list_item_title_textview,
-                new ArrayList<String>()
-        );
+        mMovies = new ArrayList<Movie>();
+        mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
         FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity());
         moviesTask.execute(Constants.MOST_POPULAR_SORT_ORDER);
-        ListView moviesListView = (ListView)rootView.findViewById(R.id.moviesListView);
-        moviesListView.setAdapter(mMovieAdapter);
+        GridView moviesGridView = (GridView)rootView.findViewById(R.id.moviesGridView);
+        moviesGridView.setAdapter(mMovieAdapter);
 
 
         return rootView;
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, String[]> {
+    public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
         private static final String MOST_POPULAR = "mostPopular";
         private static final String MOST_POPULAR_VALUE = "popularity.desc";
         private static final String HIGHEST_RATED_VALUE = "vote_average.desc";
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
-        private final static String API_KEY = "xxxxx"; // need to be obfuscated
+        private final static String API_KEY = "xxxx"; // need to be obfuscated
 
         private final Context mContext;
 
@@ -71,14 +68,14 @@ public class MoviesFragment extends Fragment {
         }
 
 
-        private String[] getMovieDataFromJson(String movieJsonString)
+        private ArrayList<Movie> getMovieDataFromJson(String movieJsonString)
                 throws JSONException {
 
             final String MDB_PAGE = "page";
 
             final String MDB_RESULTS = "results";
 
-            String[] results = null;
+            ArrayList<Movie> results = new ArrayList<Movie>();
 
             Log.v(LOG_TAG, movieJsonString);
 
@@ -87,7 +84,6 @@ public class MoviesFragment extends Fragment {
                 JSONArray movieArray = movieJson.getJSONArray(MDB_RESULTS);
 
 
-                 results = new String[movieArray.length()];
 
 
                 for(int i = 0; i < movieArray.length(); i++) {
@@ -100,7 +96,7 @@ public class MoviesFragment extends Fragment {
                     Double vote = movie.getDouble("vote_average");
 
 
-                    results[i] = "Title: " + title + " votes: " + vote;
+                    results.add(new Movie(title, path));
 
                 }
 
@@ -115,7 +111,7 @@ public class MoviesFragment extends Fragment {
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected ArrayList<Movie> doInBackground(String... params) {
 
             // Need highestRank or mostPopular
             if (params.length == 0) {
@@ -194,13 +190,10 @@ public class MoviesFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String[] result) {
+        protected void onPostExecute(ArrayList<Movie> result) {
+            mMovies.clear();
             if (result != null) {
-                mMovieAdapter.clear();
-                for(String movieStr : result) {
-                    mMovieAdapter.add(movieStr);
-                }
-                // New data is back from the server.  Hooray!
+                mMovieAdapter.updateData(result);
             }
         }
     }
