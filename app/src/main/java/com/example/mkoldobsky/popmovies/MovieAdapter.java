@@ -1,34 +1,39 @@
 package com.example.mkoldobsky.popmovies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
+import android.text.Html;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 
-public class MovieAdapter extends BaseAdapter {
+public class MovieAdapter extends ArrayAdapter<Movie> {
     private Context mContext;
+    private int mLayoutResourceId;
     private ArrayList<Movie> mMovies;
 
-    public MovieAdapter(Context c, ArrayList<Movie> movies) {
+    public MovieAdapter(Context c, int layoutResourceId, ArrayList<Movie> movies) {
+        super(c, layoutResourceId, movies);
         mContext = c;
-
+        this.mLayoutResourceId = layoutResourceId;
         this.mMovies = movies;
     }
+
 
     public int getCount() {
         return mMovies.size();
     }
 
-    public Object getItem(int position) {
+    public Movie getItem(int position) {
         return mMovies.get(position);
     }
 
@@ -38,26 +43,47 @@ public class MovieAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {
-            // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
+        View row = convertView;
+        ViewHolder holder;
+
+        if (row == null) {
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+            row = inflater.inflate(mLayoutResourceId, parent, false);
+            holder = new ViewHolder();
+            holder.titleTextView = (TextView) row.findViewById(R.id.grid_item_title_textview);
+            holder.imageView = (ImageView) row.findViewById(R.id.grid_item_poster_imageView);
+            holder.imageView.setAdjustViewBounds(true);
+            row.setTag(holder);
         } else {
-            imageView = (ImageView) convertView;
+            holder = (ViewHolder) row.getTag();
         }
 
-        Uri builtUri = Uri.parse(" http://image.tmdb.org/t/p/w185").buildUpon()
-                .appendPath("/" + mMovies.get(position).posterPath)
+        Movie movie = mMovies.get(position);
+        holder.titleTextView.setText(Html.fromHtml(movie.getTitle()));
+
+        Uri builtUri = Uri.parse("http://image.tmdb.org/t/p/w185" + movie.getPosterPath()).buildUpon()
                 .build();
         Picasso.with(mContext) //
                 .load(builtUri.toString()) //
                 .placeholder(R.drawable.placeholder) //
-                .error(R.drawable.error) //
-                .into(imageView);
-        return imageView;
+                .error(R.drawable.error)
+                .centerCrop()
+                .fit()
+                .into(holder.imageView);
+        return row;
     }
 
+    public void updateData(ArrayList<Movie> newData) {
+        if (newData != null){
+            mMovies.clear();
+            mMovies.addAll(newData);
+            notifyDataSetChanged();
+        }
+
+    }
+
+    static class ViewHolder {
+        TextView titleTextView;
+        ImageView imageView;
+    }
 }

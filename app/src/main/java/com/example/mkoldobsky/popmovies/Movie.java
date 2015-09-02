@@ -13,4 +13,11 @@ public class Movie {
         this.posterPath = posterPath;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
 }

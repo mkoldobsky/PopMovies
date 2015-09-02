@@ -9,9 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,9 +42,7 @@ public class MoviesFragment extends Fragment {
 
 
         mMovies = new ArrayList<Movie>();
-        mMovies.add(new Movie("1", "2"));
-        mMovies.add(new Movie("1", "2"));
-        mMovieAdapter = new MovieAdapter(this.getActivity(), mMovies);
+        mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
         FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity());
         moviesTask.execute(Constants.MOST_POPULAR_SORT_ORDER);
         GridView moviesGridView = (GridView)rootView.findViewById(R.id.moviesGridView);
@@ -197,8 +193,7 @@ public class MoviesFragment extends Fragment {
         protected void onPostExecute(ArrayList<Movie> result) {
             mMovies.clear();
             if (result != null) {
-                mMovies.addAll(result);
-                mMovieAdapter.notifyDataSetChanged();
+                mMovieAdapter.updateData(result);
             }
         }
     }
