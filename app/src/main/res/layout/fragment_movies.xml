@@ -3,7 +3,7 @@
     android:id="@+id/moviesGridView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:numColumns="auto_fit"
+    android:numColumns="@integer/grid_column"
     android:stretchMode="columnWidth"
     android:gravity="center"
     />
