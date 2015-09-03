@@ -6,11 +6,15 @@ package com.example.mkoldobsky.popmovies;
 public class Movie {
     String title;
     String posterPath;
+    private String plotSinapsys;
+    private Double voteAverage;
 
-    public Movie(String title, String posterPath){
+    public Movie(String title, String posterPath, String plot, Double vote){
 
         this.title = title;
         this.posterPath = posterPath;
+        plotSinapsys = plot;
+        voteAverage = vote;
     }
 
     public String getTitle() {
