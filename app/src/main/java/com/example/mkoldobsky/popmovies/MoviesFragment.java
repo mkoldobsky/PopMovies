@@ -59,7 +59,7 @@ public class MoviesFragment extends Fragment {
         private static final String HIGHEST_RATED_VALUE = "vote_average.desc";
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
-        private final static String API_KEY = "xxxx"; // need to be obfuscated
+        private final static String API_KEY = "2c6f7527e6f0169629e828e31f25db75"; // need to be obfuscated
 
         private final Context mContext;
 
