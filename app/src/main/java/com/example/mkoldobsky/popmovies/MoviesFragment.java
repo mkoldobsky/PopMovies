@@ -7,9 +7,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,8 +34,21 @@ public class MoviesFragment extends Fragment {
 
     MovieAdapter mMovieAdapter;
     ArrayList<Movie> mMovies;
+    boolean mError;
+    String mErrorMessage;
 
     public MoviesFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.sort_order, menu);
     }
 
     @Override
@@ -43,8 +60,9 @@ public class MoviesFragment extends Fragment {
 
         mMovies = new ArrayList<Movie>();
         mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
-        FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity());
-        moviesTask.execute(Constants.MOST_POPULAR_SORT_ORDER);
+        String sortOrder = Utility.getPrefSortOrder(getActivity());
+
+        updateMovies(sortOrder != null ? sortOrder : Constants.MOST_POPULAR_SORT_ORDER);
         GridView moviesGridView = (GridView)rootView.findViewById(R.id.moviesGridView);
         moviesGridView.setAdapter(mMovieAdapter);
 
@@ -52,9 +70,46 @@ public class MoviesFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateMovies(Utility.getPrefSortOrder(getActivity()));
+    }
+
+    private void updateMovies(String sortOrder) {
+        FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity());
+        moviesTask.execute(sortOrder);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_most_popular) {
+            updateMovies(Constants.MOST_POPULAR_SORT_ORDER);
+            Utility.setPrefSortOrder(getActivity(), Constants.MOST_POPULAR_SORT_ORDER);
+            return true;
+        }
+
+        if (id == R.id.action_highest_rated) {
+            updateMovies(Constants.HIGHEST_RATED_SORT_ORDER);
+            Utility.setPrefSortOrder(getActivity(), Constants.HIGHEST_RATED_SORT_ORDER);
+            return true;
+        }
+
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
 
-        private static final String MOST_POPULAR = "mostPopular";
+        private static final String MOST_POPULAR = "most_popular";
         private static final String MOST_POPULAR_VALUE = "popularity.desc";
         private static final String HIGHEST_RATED_VALUE = "vote_average.desc";
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
@@ -96,7 +151,7 @@ public class MoviesFragment extends Fragment {
                     Double vote = movie.getDouble("vote_average");
 
 
-                    results.add(new Movie(title, path));
+                    results.add(new Movie(title, path, plot, vote));
 
                 }
 
@@ -118,6 +173,9 @@ public class MoviesFragment extends Fragment {
                 return null;
             }
             String sortOrder = params[0];
+
+            mError = false;
+            mErrorMessage = "";
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -170,9 +228,13 @@ public class MoviesFragment extends Fragment {
                 return getMovieDataFromJson(moviesJsonString);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
+                mError = true;
+                mErrorMessage = e.getMessage();
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
+                mError = true;
+                mErrorMessage = e.getMessage();
             } finally {
 
                 if (urlConnection != null) {
@@ -191,10 +253,23 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArrayList<Movie> result) {
+            if (mError){
+                showErrorMessage(mErrorMessage);
+                return;
+            }
             mMovies.clear();
             if (result != null) {
                 mMovieAdapter.updateData(result);
             }
         }
+    }
+
+    private void showErrorMessage(String errorMessage) {
+
+        CharSequence text = errorMessage;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getActivity(), text, duration);
+        toast.show();
     }
 }

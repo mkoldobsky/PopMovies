@@ -19,7 +19,7 @@
         android:layout_height="0dp"
         android:layout_weight="5"
         android:fontFamily="sans-serif-condensed"
-        android:visibility="gone"
+        android:visibility="visible"
         android:textAppearance="?android:textAppearanceSmall"/>
 </LinearLayout>
 
