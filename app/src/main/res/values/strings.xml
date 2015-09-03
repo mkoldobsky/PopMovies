@@ -5,4 +5,6 @@
     <string name="action_sort_order">Sort Order</string>
     <string name="action_highest_rated">Highest Rated</string>
     <string name="action_most_popular">Most Popular</string>
+    <string name="pref_sort_order_key">sort_order</string>
+    <string name="pref_sort_order">most_popular</string>
 </resources>

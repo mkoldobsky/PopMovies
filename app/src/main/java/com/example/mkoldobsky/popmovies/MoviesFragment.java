@@ -60,12 +60,20 @@ public class MoviesFragment extends Fragment {
 
         mMovies = new ArrayList<Movie>();
         mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
-        updateMovies(Constants.MOST_POPULAR_SORT_ORDER);
+        String sortOrder = Utility.getPrefSortOrder(getActivity());
+
+        updateMovies(sortOrder != null ? sortOrder : Constants.MOST_POPULAR_SORT_ORDER);
         GridView moviesGridView = (GridView)rootView.findViewById(R.id.moviesGridView);
         moviesGridView.setAdapter(mMovieAdapter);
 
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateMovies(Utility.getPrefSortOrder(getActivity()));
     }
 
     private void updateMovies(String sortOrder) {
@@ -82,11 +90,13 @@ public class MoviesFragment extends Fragment {
 
         if (id == R.id.action_most_popular) {
             updateMovies(Constants.MOST_POPULAR_SORT_ORDER);
+            Utility.setPrefSortOrder(getActivity(), Constants.MOST_POPULAR_SORT_ORDER);
             return true;
         }
 
         if (id == R.id.action_highest_rated) {
             updateMovies(Constants.HIGHEST_RATED_SORT_ORDER);
+            Utility.setPrefSortOrder(getActivity(), Constants.HIGHEST_RATED_SORT_ORDER);
             return true;
         }
 
