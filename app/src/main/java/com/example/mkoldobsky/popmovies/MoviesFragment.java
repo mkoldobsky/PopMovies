@@ -1,6 +1,7 @@
 package com.example.mkoldobsky.popmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -60,11 +62,25 @@ public class MoviesFragment extends Fragment {
 
         mMovies = new ArrayList<Movie>();
         mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
-        String sortOrder = Utility.getPrefSortOrder(getActivity());
 
+        String sortOrder = Utility.getPrefSortOrder(getActivity());
         updateMovies(sortOrder != null ? sortOrder : Constants.MOST_POPULAR_SORT_ORDER);
+        Utility.setPrefSortOrder(getActivity(), sortOrder);
+        setActivityTitle(getContext().getString(sortOrder == Constants.MOST_POPULAR_SORT_ORDER ?
+                R.string.action_most_popular : R.string.action_highest_rated));
+
         GridView moviesGridView = (GridView)rootView.findViewById(R.id.moviesGridView);
         moviesGridView.setAdapter(mMovieAdapter);
+        moviesGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                Movie selectedMovie = mMovies.get(position);
+                intent.putExtras(selectedMovie.getBundle());
+                getActivity().startActivity(intent);
+            }
+        });
 
 
         return rootView;
@@ -91,20 +107,22 @@ public class MoviesFragment extends Fragment {
         if (id == R.id.action_most_popular) {
             updateMovies(Constants.MOST_POPULAR_SORT_ORDER);
             Utility.setPrefSortOrder(getActivity(), Constants.MOST_POPULAR_SORT_ORDER);
+            setActivityTitle(getContext().getString(R.string.action_most_popular));
             return true;
         }
 
         if (id == R.id.action_highest_rated) {
             updateMovies(Constants.HIGHEST_RATED_SORT_ORDER);
             Utility.setPrefSortOrder(getActivity(), Constants.HIGHEST_RATED_SORT_ORDER);
-            return true;
-        }
-
-        if (id == R.id.action_settings) {
+            setActivityTitle(getContext().getString(R.string.action_highest_rated));
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setActivityTitle(String sortOrder) {
+        ((MainActivity)getActivity()).setActivityTitle(sortOrder);
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<Movie>> {
@@ -112,6 +130,11 @@ public class MoviesFragment extends Fragment {
         private static final String MOST_POPULAR = "most_popular";
         private static final String MOST_POPULAR_VALUE = "popularity.desc";
         private static final String HIGHEST_RATED_VALUE = "vote_average.desc";
+        public static final String ORIGINAL_TITLE = "original_title";
+        public static final String OVERVIEW = "overview";
+        public static final String POSTER_PATH = "poster_path";
+        public static final String VOTE_AVERAGE = "vote_average";
+        public static final String RELEASE_DATE = "release_date";
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         private final static String API_KEY = "xxxx"; // need to be obfuscated
@@ -145,13 +168,14 @@ public class MoviesFragment extends Fragment {
 
                     JSONObject movie = movieArray.getJSONObject(i);
 
-                    String title = movie.getString("original_title");
-                    String plot = movie.getString("overview");
-                    String path = movie.getString("poster_path");
-                    Double vote = movie.getDouble("vote_average");
+                    String title = movie.getString(ORIGINAL_TITLE);
+                    String plot = movie.getString(OVERVIEW);
+                    String path = movie.getString(POSTER_PATH);
+                    Double vote = movie.getDouble(VOTE_AVERAGE);
+                    String date = movie.getString(RELEASE_DATE);
 
 
-                    results.add(new Movie(title, path, plot, vote));
+                    results.add(new Movie(title, path, plot, vote, date));
 
                 }
 
