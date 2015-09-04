@@ -1,8 +1,10 @@
-package com.example.mkoldobsky.popmovies;
+package com.example.mkoldobsky.popmovies.common;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import com.example.mkoldobsky.popmovies.R;
 
 public class Utility {
     public static String getPrefSortOrder(Context context) {
