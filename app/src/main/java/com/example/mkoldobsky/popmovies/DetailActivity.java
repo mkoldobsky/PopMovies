@@ -40,14 +40,17 @@ public class DetailActivity extends AppCompatActivity {
         viewHolder.releaseDateTextView = (TextView)findViewById(R.id.release_date_textview);
         viewHolder.userRatingBar = (RatingBar)findViewById(R.id.user_rating_bar);
 
+        updateDetails();
+        loadImages();
+    }
 
+    private void updateDetails() {
         viewHolder.titleTextView.setText(mMovie.getTitle());
         if (mMovie.getPlotSynopsis() != null) {
             viewHolder.plotSynopsisTextView.setText(mMovie.getPlotSynopsis());
         }
         viewHolder.releaseDateTextView.setText(mMovie.getReleaseDate());
-        viewHolder.userRatingBar.setRating(mMovie.getVoteAverage().floatValue());
-        loadImages();
+        viewHolder.userRatingBar.setRating(mMovie.getVoteAverage().floatValue() / 2);
     }
 
     private void loadImages() {
