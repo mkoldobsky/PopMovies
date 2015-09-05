@@ -27,6 +27,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setActivityTitle(String title){
-        setTitle("Pop Movies " + title);
+        setTitle(getString(R.string.main_title) + title);
     }
 }

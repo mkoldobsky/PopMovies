@@ -17,6 +17,10 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.example.mkoldobsky.popmovies.common.Constants;
+import com.example.mkoldobsky.popmovies.common.Utility;
+import com.example.mkoldobsky.popmovies.model.Movie;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +64,7 @@ public class MoviesFragment extends Fragment {
 
 
 
-        mMovies = new ArrayList<Movie>();
+        mMovies = new ArrayList<>();
         mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
 
         String sortOrder = Utility.getPrefSortOrder(getActivity());
@@ -93,7 +97,7 @@ public class MoviesFragment extends Fragment {
     }
 
     private void updateMovies(String sortOrder) {
-        FetchMoviesTask moviesTask = new FetchMoviesTask(getActivity());
+        FetchMoviesTask moviesTask = new FetchMoviesTask();
         moviesTask.execute(sortOrder);
     }
 
@@ -137,12 +141,8 @@ public class MoviesFragment extends Fragment {
         public static final String RELEASE_DATE = "release_date";
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
-        private final static String API_KEY = "xxxx"; // need to be obfuscated
 
-        private final Context mContext;
-
-        public FetchMoviesTask(Context context) {
-            mContext = context;
+        public FetchMoviesTask() {
         }
 
 
@@ -153,7 +153,7 @@ public class MoviesFragment extends Fragment {
 
             final String MDB_RESULTS = "results";
 
-            ArrayList<Movie> results = new ArrayList<Movie>();
+            ArrayList<Movie> results = new ArrayList<>();
 
             Log.v(LOG_TAG, movieJsonString);
 
@@ -205,7 +205,7 @@ public class MoviesFragment extends Fragment {
             BufferedReader reader = null;
 
             // Will contain the raw JSON response as a string.
-            String moviesJsonString = null;
+            String moviesJsonString;
 
 
             try {
@@ -218,7 +218,7 @@ public class MoviesFragment extends Fragment {
                 final String SORT_BY_VALUE = sortOrder == MOST_POPULAR ? MOST_POPULAR_VALUE : HIGHEST_RATED_VALUE;
 
                 Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                        .appendQueryParameter(API_KEY_PARAM, API_KEY)
+                        .appendQueryParameter(API_KEY_PARAM, Constants.API_KEY)
                         .appendQueryParameter(SORT_BY_PARAM, SORT_BY_VALUE)
                         .build();
 
@@ -290,10 +290,9 @@ public class MoviesFragment extends Fragment {
 
     private void showErrorMessage(String errorMessage) {
 
-        CharSequence text = errorMessage;
         int duration = Toast.LENGTH_SHORT;
 
-        Toast toast = Toast.makeText(getActivity(), text, duration);
+        Toast toast = Toast.makeText(getActivity(), errorMessage, duration);
         toast.show();
     }
 }

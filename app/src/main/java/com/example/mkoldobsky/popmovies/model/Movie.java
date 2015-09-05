@@ -1,10 +1,7 @@
-package com.example.mkoldobsky.popmovies;
+package com.example.mkoldobsky.popmovies.model;
 
 import android.os.Bundle;
 
-/**
- * Created by mkoldobsky on 2/9/15.
- */
 public class Movie {
     private String title;
     private String posterPath;
