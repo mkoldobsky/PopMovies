@@ -1,8 +1,10 @@
 package com.example.mkoldobsky.popmovies.model;
 
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Movie {
+public class Movie implements Parcelable{
     private String title;
     private String posterPath;
     private String plotSynopsis;
@@ -32,6 +34,14 @@ public class Movie {
             this.voteAverage = bundle.getDouble(VOTE_KEY);
             this.releaseDate = bundle.getString(DATE_KEY);
         }
+    }
+
+    public Movie(Parcel in) {
+        title = in.readString();
+        posterPath = in.readString();
+        plotSynopsis = in.readString();
+        voteAverage = in.readDouble();
+        releaseDate = in.readString();
     }
 
     public String getTitle() {
@@ -79,4 +89,24 @@ public class Movie {
     public String getReleaseDate() {
         return releaseDate;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 }

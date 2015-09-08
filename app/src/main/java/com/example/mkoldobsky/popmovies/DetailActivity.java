@@ -46,10 +46,14 @@ public class DetailActivity extends AppCompatActivity {
 
     private void updateDetails() {
         viewHolder.titleTextView.setText(mMovie.getTitle());
-        if (mMovie.getPlotSynopsis() != null) {
+        viewHolder.plotSynopsisTextView.setText(this.getText(R.string.not_available));
+        viewHolder.releaseDateTextView.setText(this.getText(R.string.not_available));
+        if (mMovie.getPlotSynopsis() != null && !mMovie.getPlotSynopsis().equals("null")) {
             viewHolder.plotSynopsisTextView.setText(mMovie.getPlotSynopsis());
         }
-        viewHolder.releaseDateTextView.setText(mMovie.getReleaseDate());
+        if (mMovie.getReleaseDate() != null && !mMovie.getReleaseDate().equals("null")) {
+            viewHolder.releaseDateTextView.setText(mMovie.getReleaseDate());
+        }
         viewHolder.userRatingBar.setRating(mMovie.getVoteAverage().floatValue() / 2);
     }
 

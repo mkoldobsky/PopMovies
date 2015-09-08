@@ -18,5 +18,6 @@
     <string name="user_rating">User Rating</string>
 
     <string name="not_available">N/A</string>
+    <string name="network_error">Network unavailable.</string>
 
 </resources>
