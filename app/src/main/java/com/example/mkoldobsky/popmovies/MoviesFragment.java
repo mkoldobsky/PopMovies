@@ -2,9 +2,12 @@ package com.example.mkoldobsky.popmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,12 +35,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MoviesFragment extends Fragment {
 
+    private static final String MOVIE_KEY = "movies";
     MovieAdapter mMovieAdapter;
     ArrayList<Movie> mMovies;
     boolean mError;
@@ -62,9 +67,13 @@ public class MoviesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
+        if (savedInstanceState != null)
+        {
+            mMovies = (ArrayList<Movie>)savedInstanceState.get(MOVIE_KEY);
+        } else {
+            mMovies = new ArrayList<>();
+        }
 
-
-        mMovies = new ArrayList<>();
         mMovieAdapter = new MovieAdapter(this.getActivity(), R.layout.grid_item_movie, mMovies);
 
         String sortOrder = Utility.getPrefSortOrder(getActivity());
@@ -96,9 +105,20 @@ public class MoviesFragment extends Fragment {
         updateMovies(Utility.getPrefSortOrder(getActivity()));
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(MOVIE_KEY, (ArrayList<? extends Parcelable>) mMovies);
+    }
+
+
     private void updateMovies(String sortOrder) {
-        FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute(sortOrder);
+        if (isNetworkAvailable()) {
+            FetchMoviesTask moviesTask = new FetchMoviesTask();
+            moviesTask.execute(sortOrder);
+        } else {
+            showErrorMessage(getContext().getString(R.string.network_error));
+        }
     }
 
     @Override
@@ -294,5 +314,13 @@ public class MoviesFragment extends Fragment {
 
         Toast toast = Toast.makeText(getActivity(), errorMessage, duration);
         toast.show();
+    }
+
+    //Based on a stackoverflow snippet
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
